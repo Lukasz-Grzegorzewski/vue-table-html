@@ -467,7 +467,7 @@
                   <div class="day amount" v-for="(dayAmount, index) in categoryValue.get(i)"
                     :key="monthKey+categoryKey+dayAmount">
                     {{ dayAmount + (index < categoryValue.get(i).length - 1 ? ", " :"")}} <span class="daleteBtn"
-                      @click="deleteAmount($event, monthKey, i, categoryKey, dayAmount)">x</span>
+                      @click="deleteAmount(monthKey, i, categoryKey, dayAmount)">x</span>
                   </div>
                 </td>
                 <td v-else class="day">-</span></td>
@@ -680,10 +680,27 @@
           filters.value.selectedCategories = [];
         }
 
-        const deleteAmount = (e, mth, day, cat, dayAmount) => {
+        const deleteAmount = (mth, day, cat, dayAmount) => {
+          const findIndex = (list, value) => {
+            return list.findIndex(item => item.date + item.category + item.amount === value);
+          }
           const formatedDetailsToDelete = mth + "-" + day.toString().padStart(2, '0') + cat + dayAmount;
-          const index = expenses.findIndex(expense => expense.date + expense.category + expense.amount === formatedDetailsToDelete);
+          const index = findIndex(expenses, formatedDetailsToDelete);
           if (index !== -1) expenses.splice(index, 1);
+          const localData = localStorage.getItem("expenses")
+          if (localData) {
+            const transformedLocalData = JSON.parse(localData)
+            const index = findIndex(transformedLocalData, formatedDetailsToDelete);
+            if (index !== -1) {
+              transformedLocalData.splice(index, 1);
+              localStorage.setItem("expenses", JSON.stringify(transformedLocalData))
+            }
+          }
+          // if category no longer exists and is selected for filtering gets removed from selectedCategories to filter
+          if (!constantsList.value.categories.includes(cat)) {
+            const idx = filters.value.selectedCategories.indexOf(cat)
+            filters.value.selectedCategories.splice(idx, 1)
+          }
         }
 
         // ----- TABLE HELPER functions -----
