@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Recruitment Task</title>
+  <meta name="robots" content="noindex">
+</head>
+<style>
+  /* GLOBAL */
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  /* ----- ROOT VUE ELEMENT ----- */
+  #app {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    height: 100vh;
+  }
+
+  #app * {
+    color: #777;
+  }
+
+  /* ----- MENU ----- */
+  section.menu {
+    overflow-y: auto;
+    max-height: 100%;
+    box-shadow: 10px 0 20px rgba(0, 0, 0, 0.1);
+    width: 13rem;
+    transition: all 400ms ease-in-out;
+  }
+
+  /* MENU - form  */
+  form>*,
+  .filters>* {
+    padding: .5rem 1rem;
+  }
+
+  form label,
+  .filters label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+
+  form {
+    position: relative;
+    /* z-index: 1; */
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 1rem;
+    height: 11rem;
+    transition: all 400ms ease-in-out;
+  }
+
+  form.closed {
+    height: 0;
+  }
+
+  form.closed :not(.form-close) {
+    display: none;
+  }
+
+  form .form-close {
+    position: absolute;
+    bottom: 0px;
+    left: 50%;
+    translate: -50% 0;
+    padding: 0 3rem;
+    border-radius: .5rem .5rem 0 0;
+    cursor: pointer;
+    box-shadow: 0 -1px 3px 0 #aaa;
+    font-size: xx-small;
+    transition: all 200ms ease-in-out;
+  }
+
+  form .form-close:hover {
+    background-color: #fdd;
+    transform: translate(0, -1px);
+  }
+
+  form> :nth-child(odd),
+  .filters> :nth-child(odd) {
+    background-color: #fff2e7;
+  }
+
+  form> :nth-child(even),
+  .filters> :nth-child(even) {
+    background-color: #fff9f3;
+  }
+
+
+  .filters {
+    position: relative;
+    /* z-index: 2; */
+    display: flex;
+    flex-direction: column;
+  }
+
+  .filters.off :not(.switch, .switch > *) {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  /* ----- TABLE ----- */
+  section.table {
+    position: relative;
+    overflow-y: auto;
+    max-height: 100%;
+    padding-inline: 3rem;
+    height: fit-content;
+  }
+
+  table {
+    margin: auto;
+    margin-block: 2rem;
+    border-spacing: 0px;
+    width: fit-content;
+    border-radius: .5rem;
+  }
+
+  table,
+  table * {
+    border: 1px dashed black;
+    padding: .2rem;
+  }
+
+  table thead {
+    position: sticky;
+    z-index: 4;
+    top: 0;
+    background-color: white;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+
+  table thead tr th {
+    text-align: center;
+    background-color: white;
+    position: relative;
+    z-index: 2;
+  }
+
+  table tbody .months-cell {
+    vertical-align: top;
+    border-bottom: 0;
+    text-wrap: nowrap;
+  }
+
+  table tbody .month-wrapper .month-text,
+  table tbody .month-wrapper .empty-cell,
+  table tbody .month-wrapper .total-month-cell {
+    position: sticky;
+    z-index: 2;
+    top: 2.81rem;
+    background-color: rgb(226, 255, 255);
+  }
+
+  table tbody .category-total-wrapper {
+    position: sticky;
+    z-index: 3;
+    top: 4.44rem;
+    background-color: rgb(255, 238, 219);
+  }
+
+  table tbody .empty-cell {
+    border-right: none;
+  }
+
+  table tbody .total-month-cell {
+    position: relative;
+    z-index: 2;
+    border-left: none;
+  }
+
+  table tbody .days-expenses-wrapper.containing {
+    background-color: #f5f5f5
+  }
+
+  table tbody .days-expenses-wrapper .day {
+    border-block: none;
+    padding-block: 0;
+  }
+
+  table tbody .days-expenses-wrapper .day.amount {
+    position: relative;
+    border: 0;
+    display: inline;
+  }
+
+  table tbody .days-expenses-wrapper .day.amount .daleteBtn {
+    position: absolute;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white !important;
+    font-size: .6rem;
+    left: -.35rem;
+    top: .2rem;
+    background-color: red;
+    /* padding: 1px; */
+    height: .2rem;
+    width: .2rem;
+    border-radius: 50%;
+    border: 0;
+    cursor: pointer;
+  }
+
+  table tbody .days-expenses-wrapper .day.amount .daleteBtn:hover {
+    scale: 1.1;
+  }
+
+  /* Globals */
+  .info {
+    position: absolute;
+    color: #999;
+    font-size: x-small;
+  }
+
+  input,
+  select {
+    padding: .2rem;
+    border-radius: .3rem;
+    border: 1px solid rgb(178, 178, 178);
+    font-size: .7rem;
+  }
+
+  input[type="number"] {
+    width: 4rem;
+  }
+
+  select {
+    font-size: x-small;
+  }
+
+  h2 {
+    text-align: center;
+    background-color: #ffffff !important;
+    margin: 0;
+    padding: .5rem;
+  }
+
+  h2[movable] {
+    border-top: 2px solid rgb(215, 215, 215);
+  }
+
+  button {
+    background-color: #aea;
+    border: 0;
+    cursor: pointer;
+    padding-block: .2rem;
+    border-radius: .5rem;
+    box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.2);
+    transition: all 200ms ease-in-out;
+  }
+
+  button:hover {
+    background-color: '#afa';
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.22);
+    transform: translate(1px, 1px);
+  }
+
+  .switch {
+    width: 2rem;
+    height: 1rem;
+    padding: 0;
+  }
+
+  .switch[filters] {
+    position: absolute;
+    top: .8rem;
+    left: .5rem;
+  }
+
+  .switch[table] {
+    position: fixed;
+    top: .3rem;
+    left: 13.5rem;
+  }
+
+  .switch .title {
+    position: relative;
+    right: .3rem;
+    font-size: .9rem;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #4caf50;
+    border-radius: 20px;
+    transition: 0.2s;
+  }
+
+  .slider::before {
+    position: absolute;
+    content: "";
+    height: .9rem;
+    width: .9rem;
+    border-radius: 50%;
+    background-color: white;
+    top: 1px;
+    right: 1px;
+    transition: 0.2s;
+  }
+
+  input:checked+.slider {
+    background-color: #fb5454;
+
+  }
+
+  input:checked+.slider::before {
+    transform: translateX(-1rem);
+  }
+</style>
+
+<body>
+  <div id="app">
+    <section class="menu">
+      <h2>Add expense</h2>
+      <form @submit="onSubmit" :class="{closed: isFormClosed}">
+        <label>
+          Date
+          <input type="date" v-model="newExpense.date" required>
+        </label>
+        <div style="display: flex; flex-direction: column; gap: .3rem;">
+          <div>
+            <label>
+              Category
+              <input ref="newCategoryInput" type="text" v-model="newExpense.newCategory"
+                @input="handleNewCategoryChangeInput" name="newCategory" style="width: 70px;" required>
+            </label>
+          </div>
+
+          <!-- <label style="align-self: flex-end;"> -->
+          <div style="position: relative; align-self: flex-end;">
+            <select ref="existingCategoryInput" :value="newExpense.existingCategory"
+              @change="handleExistingCategoryChangeSelect" name="existingCategory">
+              <option value="" selected></option>
+              <option v-for="cat in constantsList.categories" :value="cat" style="font-size: x-small;">
+                {{ cat.length > 15 ? cat.substring(0, 15) + "..." : cat }}
+              </option>
+            </select>
+            <span class="info" style="left:-3rem; text-align: center;">existing<br>categories</span>
+          </div>
+        </div>
+        <label>
+          Amount
+          <input type="number" v-model="newExpense.amount" @change="validateFormAmount" required step="0.01">
+        </label>
+        <div style="text-align: center; ">
+          <button type="submit">
+            Add
+          </button>
+          <div> {{insertStatus}} </div>
+        </div>
+        <div class="form-close" @click="toggleForm">{{ isFormClosed ? "▼" : "▲"}}</div>
+      </form>
+
+      <div class="filters" :class="{off: !switchFilters}">
+        <h2 movable> Filters </h2>
+        <button
+          style="position: absolute; right: 2rem; top: 1.3rem; font-size: x-small; padding: .1rem .2rem; background-color: rgb(255, 209, 216);"
+          @click="resetFilters">Reset</button>
+        <label class="switch" filters>
+          <input type="checkbox" @change="toggleFilters">
+          <span class="slider"></span>
+        </label>
+        <label>
+          Hide empty days
+          <input v-model="filters.hideEmptyDays" type="checkbox">
+        </label>
+        <label style="display: flex; justify-content: space-between;">
+          Month
+          <select v-model="filters.selectedMonth">
+            <option value="" selected>All</option>
+            <option v-for="month in constantsList.months" :key="month" :value="month">{{ month }}</option>
+          </select>
+        </label>
+        <div style="display: flex; flex-direction: column;  padding-bottom: 1rem; gap: .3rem;">
+          Expense range
+          <div class="range-inputs-wrapper"
+            style="display: flex; justify-content: center; align-items: center; align-self: flex-end; gap: .2rem;">
+            <label>
+              <input type="number" name="minRange" step="0.01" v-model="filters.expenseAmountRange.min"
+                @change="validateRangeAmount" />
+            </label>
+            -
+            <label style="position:relative">
+              <input type="number" name="maxRange" step="0.01" v-model="filters.expenseAmountRange.max"
+                @change="validateRangeAmount" />
+              <span class="info" style="bottom: -.7rem; right: 0; text-wrap: nowrap;">max: {{
+                constantsList.maxAmount }}</span>
+            </label>
+          </div>
+        </div>
+        <div style=" display: flex;">
+          <span>Categories</span>
+          <div style="display: flex; flex-direction: column; align-items: start;">
+            <template v-for="category in constantsList.categories">
+              <label>
+                <input type="checkbox" :checked="filters.selectedCategories.includes(category)"
+                  @change="toggleCategory(category)">
+                <span style="font-size: small;">
+                  {{ category.length > 15 ? category.substring(0, 15) + "..." : category }}
+                </span>
+              </label>
+            </template>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="table">
+      <label class="switch" table>
+        <p class="title">sorting</p>
+        <input type="checkbox" @change="toggleSorting">
+        <span class="slider"></span>
+      </label>
+      <table>
+        <thead class="header">
+          <!-- 3 columns =>        ||             month            | Category/day |    expenses   ||  -->
+          <tr>
+            <th>month</th>
+            <th>category<br>day</th>
+            <th>expenses</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- rows for =>         || month(rowspan = maxElements) |     empty    |   totalMonth  ||  -->
+          <template v-for="([monthKey, monthValue]) in groupedExpenses">
+            <tr class="month-wrapper">
+              <th class="months-cell" :rowspan="countMonthRows(monthValue)">
+                <span class="month-text" style="border: 0;"> {{ monthKey }} </span>
+              </th>
+              <td class="empty-cell"></td>
+              <td class="total-month-cell">total: {{ countTotalMonth(monthValue) }}</td>
+            </tr>
+            <!-- rows for =>       ||         taken(byMonth)       |  categories  | totalCategory ||  -->
+            <template class="subtable" v-for="([categoryKey, categoryValue]) in monthValue.get('categories')">
+              <tr class="category-total-wrapper">
+                <td>{{ categoryKey.length > 20 ? categoryKey.substring(0, 20) + "..." : categoryKey }}</td>
+                <td>total: {{ countTotalCategory(categoryValue) }}</td>
+              </tr>
+              <!-- rows for =>     ||         taken(byMonth)       | days(1..max) |    amounts    ||  -->
+              <tr class="days-expenses-wrapper" v-for="i in (getDays(categoryValue, monthValue))"
+                :class="{containing: categoryValue.has(i)}">
+                <td class="day">{{ i }}</td>
+                <td v-if="categoryValue.has(i)" class="day">
+                  <div class="day amount" v-for="(dayAmount, index) in categoryValue.get(i)"
+                    :key="monthKey+categoryKey+dayAmount">
+                    {{ dayAmount + (index < categoryValue.get(i).length - 1 ? ", " :"")}} <span class="daleteBtn"
+                      @click="deleteAmount($event, monthKey, i, categoryKey, dayAmount)">x</span>
+                  </div>
+                </td>
+                <td v-else class="day">-</span></td>
+              </tr>
+            </template>
+          </template>
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <!-- EXPENSES FILTER CLASS -->
+  <script>
+    class ExpenseFilter {
+      constructor(expenses) { this.expenses = expenses; }
+
+      filterByRange(min, max) {
+        this.expenses = this.expenses.filter((ex) => ex.amount >= min && ex.amount <= max);
+        return this;
+      }
+
+      filterByCategory(categories) {
+        if (categories.length > 0) {
+          this.expenses = this.expenses.filter((ex) => categories.includes(ex.category));
+        }
+        return this;
+      }
+
+      filterByMonth(month) {
+        if (month !== "") this.expenses = this.expenses.filter((ex) => ex.date.includes(month));
+        return this;
+      }
+
+      getFilteredExpenses() {
+        return this.expenses;
+      }
+    }
+  </script>
+
+  <script type="module">
+    import { createApp, reactive, computed, ref, onMounted, watch } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+
+    createApp({
+      setup() {
+
+        const expenses = reactive([
+          { "date": "2023-03-01", category: "education", amount: 200 },
+          { "date": "2021-05-20", category: "entertainment", amount: 65.5 },
+          { "date": "2023-09-15", category: "entertainment", amount: 120.5 },
+          { "date": "2020-03-31", category: "food", "amount": 6 },
+          { "date": "2021-08-02", category: "medical", "amount": 300.5 },
+          { "date": "2020-03-01", category: "food", "amount": 23 },
+          { "date": "2021-07-20", category: "travel", "amount": 800 },
+          { "date": "2021-06-15", category: "groceries", "amount": 120.45 },
+          { "date": "2023-03-31", category: "fuel", amount: 78.3 },
+          { "date": "2023-04-05", category: "utilities", amount: 95.8 },
+          { "date": "2023-05-15", category: "education", amount: 300 },
+          { "date": "2023-09-01", category: "healthcare", amount: 400 },
+          { "date": "2023-10-01", category: "utilities", amount: 85.7 },
+          { "date": "2021-07-10", category: "fuel", "amount": 65.78 },
+          { "date": "2021-08-01", category: "rent", "amount": 1500 },
+          { "date": "2021-06-25", category: "fuel", "amount": 70.5 },
+          { "date": "2021-06-22", category: "fuel", "amount": 55.25 },
+          { "date": "2023-08-15", category: "fuel", amount: 60.75 },
+          { "date": "2021-07-05", category: "groceries", "amount": 45.3 },
+          { "date": "2020-04-02", category: "food", "amount": 9 },
+          { "date": "2020-03-04", category: "food", "amount": 50 },
+          { "date": "2021-05-15", category: "utilities", amount: 150.89 },
+          { "date": "2020-03-01", category: "food", "amount": 55 },
+          { "date": "2021-06-10", category: "fuel", "amount": 100 },
+          { "date": "2021-06-20", category: "entertainment", "amount": 120 },
+          { "date": "2021-07-30", category: "groceries", "amount": 35.99 },
+          { "date": "2021-06-18", category: "travel", "amount": 600.75 },
+          { "date": "2023-02-14", category: "entertainment", amount: 75 },
+          { "date": "2022-08-15", category: "fuel", amount: 50.4 },
+          { "date": "2022-08-15", category: "groceries", amount: 120.67 },
+          { "date": "2023-01-05", category: "healthcare", amount: 320.45 },
+          { "date": "2021-07-15", category: "entertainment", "amount": 200 },
+          { "date": "2021-06-01", category: "groceries", "amount": 29.99 },
+          { "date": "2020-03-31", category: "fuel", "amount": 210.2 },
+          { "date": "2023-06-20", category: "shopping", amount: 220.99 },
+          { "date": "2023-07-01", category: "groceries", amount: 15.29 },
+          { "date": "2023-07-02", category: "shopping", amount: 90 },
+          { "date": "2023-03-12", category: "groceries", amount: 18.6 },
+          { "date": "2023-12-01", category: "fuel", amount: 89.34 },
+          { "date": "2023-12-25", category: "entertainment", amount: 150.23 },
+          { "date": "2023-10-15", category: "education", amount: 100 },
+          { "date": "2023-11-05", category: "groceries", amount: 45.89 },
+          { "date": "2022-08-10", category: "shopping", amount: 430.99 },
+          { "date": "2021-07-12", category: "entertainment", "amount": 89.99 },
+        ])
+
+        // ----- EXPENSES(localStorage) INJECTION -----
+        onMounted(() => {
+          const localData = localStorage.getItem("expenses");
+          if (localData) expenses.push(...JSON.parse(localData));
+          // update states from URL on mount
+          const queries = new URLSearchParams(window.location.search);
+          for (const [queryKey, queryValue] of [...queries.entries()]) {
+            if (queryKey === "hideEmptyDays") filters.value.hideEmptyDays = queryValue === "true";
+            else if (queryKey === "selectedMonth") filters.value.selectedMonth = queryValue;
+            else if (queryKey === "min" || queryKey === "max") filters.value.expenseAmountRange[queryKey] = parseFloat(queryValue);
+            else if (queryKey === "selectedCategories") filters.value.selectedCategories.push(queryValue);
+          }
+        })
+
+        // ----- DERIVED CONSTANTS OF EXPENSES -----
+        const constantsList = computed(() => {
+          const { maxAmount, categories, months } = expenses.reduce((o, expense) => {
+            o.maxAmount = Math.max(o.maxAmount, expense.amount);
+            o.categories.add(expense.category);
+            const [year, month] = expense.date.split("-");
+            o.months.add(`${year}-${month}`);
+            return o;
+          }, { maxAmount: 0, categories: new Set(), months: new Set() });
+
+          // (Set->Array).sort: sorting categories, and months to render it in alphabetical order in UI
+          return { maxAmount, categories: [...categories].sort(), months: [...months].sort() }
+        });
+
+        // ----- STATEs-----
+        const isFormClosed = ref(false);
+        const insertStatus = ref("");
+        const newExpense = ref({ date: "", existingCategory: "", newCategory: "", amount: 0 })
+        const switchFilters = ref(true);
+        const switchSorting = ref(true);
+        const filters = ref({
+          hideEmptyDays: false,
+          selectedMonth: "",
+          expenseAmountRange: { min: 0, max: constantsList.value.maxAmount },
+          selectedCategories: [],
+        })
+
+        // tags references
+        const newCategoryInput = ref(null);
+        const existingCategoryInput = ref(null);
+
+        // ----- WATCHERS -----
+        // update url filters
+        watch(filters, () => {
+          // if any filter is changed URL query object is updated
+          const queries = new URLSearchParams();
+          filters.value.selectedCategories.forEach((category) => queries.append('selectedCategories', category));
+          if (filters.value.selectedMonth) queries.set('selectedMonth', filters.value.selectedMonth);
+          if (filters.value.expenseAmountRange.min > 0) queries.set('min', filters.value.expenseAmountRange.min);
+          if (filters.value.expenseAmountRange.max < constantsList.value.maxAmount) queries.set('max', filters.value.expenseAmountRange.max);
+          if (filters.value.hideEmptyDays) queries.set('hideEmptyDays', filters.value.hideEmptyDays.toString());
+
+          window.history.pushState({}, '', queries.size > 0 ? `?${queries.toString()}` : window.location.pathname);
+        }, { deep: true });
+
+        // watching new max amount constant of all expenses after adding new expense
+        watch(() => constantsList.value.maxAmount,
+          (newMaxAmount) => { filters.value.expenseAmountRange.max = newMaxAmount; }
+        );
+
+        // ----- STATE MENAGEMENT -----
+        const handleNewCategoryChangeInput = () => {
+          newExpense.value.newCategory = newCategoryInput.value.value.toLowerCase()
+          existingCategoryInput.value.value = newExpense.value.newCategory
+        };
+
+        const handleExistingCategoryChangeSelect = () => {
+          newExpense.value.newCategory = existingCategoryInput.value.value
+          newExpense.value.existingCategory = existingCategoryInput.value.value
+        };
+
+        const toggleCategory = (category) => {
+          if (filters.value.selectedCategories.includes(category)) filters.value.selectedCategories = filters.value.selectedCategories.filter((item) => item !== category);
+          else filters.value.selectedCategories.push(category);
+        };
+
+        const validateRangeAmount = (e) => {
+          const value = e.target.value;
+          const name = e.target.name;
+          if (name === "minRange") {
+            if (value < 0) filters.value.expenseAmountRange.min = 0;
+            if (filters.value.expenseAmountRange.min > filters.value.expenseAmountRange.max) filters.value.expenseAmountRange.min = filters.value.expenseAmountRange.max;
+          }
+          if (name === "maxRange") {
+            if (value > constantsList.value.maxAmount) filters.value.expenseAmountRange.max = constantsList.value.maxAmount;
+            if (filters.value.expenseAmountRange.max < filters.value.expenseAmountRange.min) filters.value.expenseAmountRange.max = filters.value.expenseAmountRange.min;
+          }
+          filters.value.expenseAmountRange.min = Math.round(filters.value.expenseAmountRange.min * 100) / 100;
+          filters.value.expenseAmountRange.max = Math.round(filters.value.expenseAmountRange.max * 100) / 100;
+        }
+
+        const validateFormAmount = (e) => {
+          const value = e.target.value;
+          if (value < 0) newExpense.value.amount = 0;
+        }
+
+        const toggleForm = () => {
+          isFormClosed.value = !isFormClosed.value
+        }
+
+        const toggleFilters = () => {
+          switchFilters.value = !switchFilters.value
+        }
+
+        const toggleSorting = () => {
+          switchSorting.value = !switchSorting.value
+        }
+
+        const resetFilters = () => {
+          filters.value.hideEmptyDays = false;
+          filters.value.selectedMonth = "";
+          filters.value.expenseAmountRange.min = 0;
+          filters.value.expenseAmountRange.max = constantsList.value.maxAmount;
+          filters.value.selectedCategories = [];
+        }
+
+        const deleteAmount = (e, mth, day, cat, dayAmount) => {
+          const formatedDetailsToDelete = mth + "-" + day.toString().padStart(2, '0') + cat + dayAmount;
+          const index = expenses.findIndex(expense => expense.date + expense.category + expense.amount === formatedDetailsToDelete);
+          if (index !== -1) expenses.splice(index, 1);
+        }
+
+        // ----- TABLE HELPER functions -----
+        const countMonthRows = (month) => {
+          const categoriesList = month.get("categories");
+          const countCategories = categoriesList.size;
+
+          const days = [...categoriesList.values()].map(cat => [...cat.keys()]).flat();
+
+          return switchFilters.value && filters.value.hideEmptyDays
+            ? days.length + countCategories + 1
+            : (month.get("countDays") * countCategories) + countCategories + 1
+        }
+
+        const countTotalCategory = (category) => {
+          let sum = Array.from(category.values())
+            .flat()
+            .reduce((acc, amount) => acc + amount, 0);
+          // avoid issue with floating point (0.1 + 0.2 = 0.30000000000000004)
+          sum = Math.round((sum * 1000) / 1000);
+          return sum;
+        };
+
+        const countTotalMonth = (monthData) => {
+          let sum = monthData.get("categories")
+            .values()
+            .reduce((acc, cat) => acc + countTotalCategory(cat), 0);
+          // avoid issue with floating point (0.1 + 0.2 = 0.30000000000000004)
+
+          sum = Math.round((sum * 1000) / 1000);
+          return sum;
+        };
+
+        const getDays = (category, month) => {
+          return switchFilters.value && filters.value.hideEmptyDays ? category.keys() : month.get('countDays')
+        }
+
+        // ----- FILTERING -----
+        const filteredExpenses = computed(() => {
+          return new ExpenseFilter([...expenses])
+            .filterByRange(filters.value.expenseAmountRange.min, filters.value.expenseAmountRange.max)
+            .filterByCategory(filters.value.selectedCategories)
+            .filterByMonth(filters.value.selectedMonth)
+            .getFilteredExpenses();
+        });
+
+        // ----- FORM submit -----
+        const onSubmit = (event) => {
+          event.preventDefault();
+          const newExp = { date: newExpense.value.date, category: newExpense.value.newCategory, amount: newExpense.value.amount };
+          expenses.push(newExp);
+
+          // update localStorage expenses
+          const localData = JSON.parse(localStorage.getItem('expenses')) || [];
+          localData.push(newExp)
+          localStorage.setItem('expenses', JSON.stringify(localData))
+
+          // adapt filters if no filter chosen move it to new amount added otherwise kepp filter chosen before 
+          if (newExpense.value.amount > filters.value.expenseAmountRange.max) {
+            const maxQuery = new URLSearchParams(window.location.search).get("max")
+            if (!maxQuery) filters.value.expenseAmountRange.max = newExpense.value.amount
+          }
+
+          // reset form
+          newExpense.value.date = "";
+          newExpense.value.newCategory = "";
+          newExpense.value.existingCategory = "";
+          newExpense.value.amount = 0
+
+          // notification
+          insertStatus.value = "Added !"
+          setTimeout(() => { insertStatus.value = "" }, 2000)
+        };
+
+        // ----- HELPER FUNCTIONS -----
+        function sortSimpleExpansesBy(expensesSimpleList, key) {
+          return expensesSimpleList.sort((a, b) => a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0);
+        }
+
+        function sortExpansesByCategories(expensesMapList) {
+          // category sort for each month
+          expensesMapList.forEach(month => {
+            // each month contains categories that is a Map so following steps take place :
+            //        1: Map(categories)->Array->sortArray->Map
+            //        2: month.categories(Map) are replaced by new sorted Map 
+            const sortedCategories = new Map(
+              [...month.get("categories")]
+                .sort(([categoryKeyA], [categoryKeyB]) => categoryKeyA < categoryKeyB ? -1 : categoryKeyA > categoryKeyB ? 1 : 0)
+            )
+            month.set("categories", sortedCategories);
+          })
+          return expensesMapList;
+        }
+
+        // ----- DERIVED/GROUPED STATE -----
+        const groupedExpenses = computed(() => {
+          // Expected :
+          //  Map { "2023-03": Map {
+          //        countDays: 31,
+          //        categories: Map { "food": Map { 10: [55, 32], 25: [57] }, "fuel": Map { 15: [200] } },
+          //      },
+          //  Map {...}
+          const organisedExpenses = new Map();
+
+          // Filters nad sorting on/off checking
+          // filter & sort are on
+          // only sort is on. Passing shallow copy not to modify original array
+          let preparedExpenses;
+
+          if (switchSorting.value && switchFilters.value) preparedExpenses = sortSimpleExpansesBy([...filteredExpenses.value], "date");
+          else if (!switchSorting.value && !switchFilters.value) preparedExpenses = [...expenses];
+          else if (switchSorting.value) preparedExpenses = sortSimpleExpansesBy([...expenses], "date");
+          else preparedExpenses = [...filteredExpenses.value];
+
+          for (const { date, category, amount } of preparedExpenses) {
+
+            // destructuration of data
+            const [year, month, day] = date.split("-");
+            const dayNum = Number(day);
+            const yearMonth = `${year}-${month}`;
+
+            // if month not found  ->create new->  month : Map { Number cauntDays, Map categories{} }
+            if (!organisedExpenses.has(yearMonth)) {
+              const yearMonthData = new Map();
+              yearMonthData.set("countDays", new Date(year, month, 0).getDate());
+              yearMonthData.set("categories", new Map());
+              organisedExpenses.set(yearMonth, yearMonthData);
+            }
+
+            // if category not found  ->create new->  category : Map {}
+            const yearMonthExisting = organisedExpenses.get(yearMonth)
+            const categories = yearMonthExisting.get("categories")
+            if (!categories.has(category)) {
+              categories.set(category, new Map());
+            }
+
+            // if day not found  ->create new->  day : []
+            const categoryExisting = categories.get(category);
+            if (!categoryExisting.has(dayNum)) {
+              categoryExisting.set(dayNum, [])
+            }
+
+            // add amont to currentDay of currentCategory -> categories -> currentMonth
+            categoryExisting.get(dayNum).push(amount)
+          }
+
+          // sorting categories of each month if switchSorting is on
+          const sortedExpanses = switchSorting.value ? sortExpansesByCategories(organisedExpenses) : organisedExpenses;
+
+          return sortedExpanses
+        })
+
+        return {
+          // ----- STATEs -----
+          newExpense,
+          filters,
+          isFormClosed,
+          insertStatus,
+          switchFilters,
+          // ----- STATE MENAGEMENT -----
+          handleNewCategoryChangeInput,
+          handleExistingCategoryChangeSelect,
+          validateFormAmount,
+          toggleFilters,
+          toggleSorting,
+          toggleForm,
+          deleteAmount,
+          // ----- FILTER MENAGEMENT -----
+          toggleCategory,
+          validateRangeAmount,
+          resetFilters,
+          // ----- TAG REFs ------
+          newCategoryInput,
+          existingCategoryInput,
+          // ----- TABLE HELPER functions -----
+          countMonthRows,
+          countTotalCategory,
+          countTotalMonth,
+          getDays,
+          // ----- FORM submit -----
+          onSubmit,
+          // ----- DERIVED/GROUPED STATE -----
+          groupedExpenses,
+          // ----- DERIVED CONSTANTS OF EXPENSES -----
+          constantsList
+        };
+      },
+    }).mount('#app');
+  </script>
+</body>
+
+</html>
