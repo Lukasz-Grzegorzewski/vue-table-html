@@ -1,3 +1,3 @@
-# Project to practice of VUE framework.
+# Project to practice the VUE framework.
 
 ## table - html / js - with reactive functionality with VUE.
