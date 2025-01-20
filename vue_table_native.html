@@ -55,7 +55,7 @@
     display: flex;
     flex-direction: column;
     padding-bottom: 1rem;
-    height: 11rem;
+    height: 12rem;
     transition: all 400ms ease-in-out;
   }
 
@@ -95,17 +95,100 @@
     background-color: #fff9f3;
   }
 
+  form .category-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+  }
+
+  form .category-wrapper .existing-category-wrapper {
+    position: relative;
+    align-self: flex-end;
+  }
+
+  form .button-add-wrapper {
+    text-align: center;
+  }
+
+  form .button-add-wrapper button[type="submit"] {
+    background-color: #aea;
+    border: 0;
+    cursor: pointer;
+    padding-block: .2rem;
+    border-radius: .5rem;
+    box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.2);
+    transition: all 200ms ease-in-out;
+  }
+
+  form .button-add-wrapper button[type="submit"]:hover {
+    background-color: #afa;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.22);
+    transform: translate(1px, 1px);
+  }
 
   .filters {
     position: relative;
-    /* z-index: 2; */
     display: flex;
     flex-direction: column;
+  }
+
+  .filters button.button-reset {
+    border: 0;
+    cursor: pointer;
+    position: absolute;
+    padding: 0 .2rem;
+    background-color: transparent;
+    right: .2rem;
+    top: .2rem;
+    font-size: .7rem;
+    color: rgb(255, 61, 61) !important;
   }
 
   .filters.off :not(.switch, .switch > *) {
     pointer-events: none;
     opacity: 0.6;
+  }
+
+  .filters .direction {
+    position: absolute;
+    right: 2rem;
+    top: 1.3rem;
+    font-size: x-small;
+    padding: .1rem .2rem;
+    background-color: rgb(255, 209, 216);
+  }
+
+  .filters .filter-range-wrapper {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 1rem;
+    gap: .3rem;
+  }
+
+  .filters .filter-range-wrapper .range-inputs-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-self: flex-end;
+    gap: .2rem;
+  }
+
+  .filters .filter-range-wrapper .range-inputs-wrapper .max-range-input {
+    position: relative;
+  }
+
+  .filters .filter-categories-wrapper {
+    display: flex;
+  }
+
+  .filters .filter-categories-wrapper .filter-categories-inputs {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+  }
+
+  .filters .filter-categories-wrapper .filter-categories-inputs label .category-label {
+    font-size: small;
   }
 
   /* ----- TABLE ----- */
@@ -146,6 +229,26 @@
     z-index: 2;
   }
 
+  table thead tr th .button-sort {
+    position: absolute;
+    cursor: pointer;
+    color: rgb(2, 240, 2) !important;
+    padding: 0;
+    bottom: 0;
+    right: 0;
+    font-size: .7rem;
+    border: 0;
+    background-color: transparent;
+  }
+
+  table thead tr th .button-sort.desc {
+    color: rgb(254, 78, 78) !important;
+  }
+
+  table thead tr th .button-sort.off {
+    color: rgb(73, 73, 73) !important;
+  }
+
   table tbody .months-cell {
     vertical-align: top;
     border-bottom: 0;
@@ -159,6 +262,10 @@
     z-index: 2;
     top: 2.81rem;
     background-color: rgb(226, 255, 255);
+  }
+
+  table tbody .month-wrapper .month-text {
+    border: 0;
   }
 
   table tbody .category-total-wrapper {
@@ -223,6 +330,17 @@
     font-size: x-small;
   }
 
+  .info[existing-category] {
+    left: -3rem;
+    text-align: center;
+  }
+
+  .info[max-expense] {
+    bottom: -.7rem;
+    right: 0;
+    text-wrap: nowrap;
+  }
+
   input,
   select {
     padding: .2rem;
@@ -231,7 +349,8 @@
     font-size: .7rem;
   }
 
-  input[type="number"] {
+  input[type="number"],
+  input[type="text"] {
     width: 4rem;
   }
 
@@ -248,22 +367,6 @@
 
   h2[movable] {
     border-top: 2px solid rgb(215, 215, 215);
-  }
-
-  button {
-    background-color: #aea;
-    border: 0;
-    cursor: pointer;
-    padding-block: .2rem;
-    border-radius: .5rem;
-    box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.2);
-    transition: all 200ms ease-in-out;
-  }
-
-  button:hover {
-    background-color: '#afa';
-    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.22);
-    transform: translate(1px, 1px);
   }
 
   .switch {
@@ -339,32 +442,32 @@
           Date
           <input type="date" v-model="newExpense.date" required>
         </label>
-        <div style="display: flex; flex-direction: column; gap: .3rem;">
+        <div class="category-wrapper">
           <div>
             <label>
               Category
               <input ref="newCategoryInput" type="text" v-model="newExpense.newCategory"
-                @input="handleNewCategoryChangeInput" name="newCategory" style="width: 70px;" required>
+                @input="handleNewCategoryChangeInput" name="newCategory" required>
             </label>
           </div>
 
           <!-- <label style="align-self: flex-end;"> -->
-          <div style="position: relative; align-self: flex-end;">
+          <div class="existing-category-wrapper">
             <select ref="existingCategoryInput" :value="newExpense.existingCategory"
               @change="handleExistingCategoryChangeSelect" name="existingCategory">
               <option value="" selected></option>
-              <option v-for="cat in constantsList.categories" :value="cat" style="font-size: x-small;">
+              <option v-for="cat in constantsList.categories" :value="cat">
                 {{ cat.length > 15 ? cat.substring(0, 15) + "..." : cat }}
               </option>
             </select>
-            <span class="info" style="left:-3rem; text-align: center;">existing<br>categories</span>
+            <span class="info" existing-category>existing<br>categories</span>
           </div>
         </div>
         <label>
           Amount
           <input type="number" v-model="newExpense.amount" @change="validateFormAmount" required step="0.01">
         </label>
-        <div style="text-align: center; ">
+        <div class="button-add-wrapper">
           <button type="submit">
             Add
           </button>
@@ -375,9 +478,7 @@
 
       <div class="filters" :class="{off: !switchFilters}">
         <h2 movable> Filters </h2>
-        <button
-          style="position: absolute; right: 2rem; top: 1.3rem; font-size: x-small; padding: .1rem .2rem; background-color: rgb(255, 209, 216);"
-          @click="resetFilters">Reset</button>
+        <button class="button-reset" @click="resetFilters">Reset</button>
         <label class="switch" filters>
           <input type="checkbox" @change="toggleFilters">
           <span class="slider"></span>
@@ -386,38 +487,36 @@
           Hide empty days
           <input v-model="filters.hideEmptyDays" type="checkbox">
         </label>
-        <label style="display: flex; justify-content: space-between;">
+        <label>
           Month
           <select v-model="filters.selectedMonth">
             <option value="" selected>All</option>
             <option v-for="month in constantsList.months" :key="month" :value="month">{{ month }}</option>
           </select>
         </label>
-        <div style="display: flex; flex-direction: column;  padding-bottom: 1rem; gap: .3rem;">
+        <div class="filter-range-wrapper">
           Expense range
-          <div class="range-inputs-wrapper"
-            style="display: flex; justify-content: center; align-items: center; align-self: flex-end; gap: .2rem;">
+          <div class="range-inputs-wrapper">
             <label>
               <input type="number" name="minRange" step="0.01" v-model="filters.expenseAmountRange.min"
                 @change="validateRangeAmount" />
             </label>
             -
-            <label style="position:relative">
+            <label class="max-range-input">
               <input type="number" name="maxRange" step="0.01" v-model="filters.expenseAmountRange.max"
                 @change="validateRangeAmount" />
-              <span class="info" style="bottom: -.7rem; right: 0; text-wrap: nowrap;">max: {{
-                constantsList.maxAmount }}</span>
+              <span class="info" max-expense>max: {{ constantsList.maxAmount }}</span>
             </label>
           </div>
         </div>
-        <div style=" display: flex;">
+        <div class="filter-categories-wrapper">
           <span>Categories</span>
-          <div style="display: flex; flex-direction: column; align-items: start;">
+          <div class="filter-categories-inputs">
             <template v-for="category in constantsList.categories">
               <label>
                 <input type="checkbox" :checked="filters.selectedCategories.includes(category)"
                   @change="toggleCategory(category)">
-                <span style="font-size: small;">
+                <span class="category-label">
                   {{ category.length > 15 ? category.substring(0, 15) + "..." : category }}
                 </span>
               </label>
@@ -429,17 +528,23 @@
     </section>
 
     <section class="table">
-      <label class="switch" table>
-        <p class="title">sorting</p>
-        <input type="checkbox" @change="toggleSorting">
-        <span class="slider"></span>
-      </label>
       <table>
-        <thead class="header">
+        <thead>
           <!-- 3 columns =>        ||             month            | Category/day |    expenses   ||  -->
           <tr>
-            <th>month</th>
-            <th>category<br>day</th>
+            <th class="month-header">month
+              <button class="button-sort"
+                :class="{desc: switchSortingColumn.month === -1, off: switchSortingColumn.month === 0}"
+                @click="toggleSorting" name="month">
+                {{ switchSortingColumn.month === 1 ? "▼" : switchSortingColumn.month === -1 ? "▲" : "▶︎" }}</button>
+            </th>
+            <th class="category-day-header">category<br>day
+              <button class="button-sort"
+                :class="{desc: switchSortingColumn.category === -1, off: switchSortingColumn.category === 0}"
+                @click="toggleSorting" name="category">
+                {{ switchSortingColumn.category === 1 ? "▼" : switchSortingColumn.category === -1 ? "▲" : "▶︎"
+                }}</button>
+            </th>
             <th>expenses</th>
           </tr>
         </thead>
@@ -448,7 +553,7 @@
           <template v-for="([monthKey, monthValue]) in groupedExpenses">
             <tr class="month-wrapper">
               <th class="months-cell" :rowspan="countMonthRows(monthValue)">
-                <span class="month-text" style="border: 0;"> {{ monthKey }} </span>
+                <span class="month-text"> {{ monthKey }} </span>
               </th>
               <td class="empty-cell"></td>
               <td class="total-month-cell">total: {{ countTotalMonth(monthValue) }}</td>
@@ -563,7 +668,10 @@
         // ----- EXPENSES(localStorage) INJECTION -----
         onMounted(() => {
           const localData = localStorage.getItem("expenses");
-          if (localData) expenses.push(...JSON.parse(localData));
+          if (localData) {
+            const parsed = safeJSONParse(localData, "error: parsing failure during loading expenses from localStorage")
+            if (parsed) expenses.push(...parsed);
+          }
           // update states from URL on mount
           const queries = new URLSearchParams(window.location.search);
           for (const [queryKey, queryValue] of [...queries.entries()]) {
@@ -584,7 +692,7 @@
             return o;
           }, { maxAmount: 0, categories: new Set(), months: new Set() });
 
-          // (Set->Array).sort: sorting categories, and months to render it in alphabetical order in UI
+          // (Set->Array).sort: sorting categories, and months to render it in alphabetical order in UI filters selects
           return { maxAmount, categories: [...categories].sort(), months: [...months].sort() }
         });
 
@@ -593,7 +701,8 @@
         const insertStatus = ref("");
         const newExpense = ref({ date: "", existingCategory: "", newCategory: "", amount: 0 })
         const switchFilters = ref(true);
-        const switchSorting = ref(true);
+        // 1 -> ascending . -1 -> descending
+        const switchSortingColumn = ref({ month: 1, category: 1 });
         const filters = ref({
           hideEmptyDays: false,
           selectedMonth: "",
@@ -618,11 +727,6 @@
 
           window.history.pushState({}, '', queries.size > 0 ? `?${queries.toString()}` : window.location.pathname);
         }, { deep: true });
-
-        // watching new max amount constant of all expenses after adding new expense
-        watch(() => constantsList.value.maxAmount,
-          (newMaxAmount) => { filters.value.expenseAmountRange.max = newMaxAmount; }
-        );
 
         // ----- STATE MENAGEMENT -----
         const handleNewCategoryChangeInput = () => {
@@ -668,8 +772,17 @@
           switchFilters.value = !switchFilters.value
         }
 
-        const toggleSorting = () => {
-          switchSorting.value = !switchSorting.value
+        const toggleSorting = (e) => {
+          const name = e.target.name
+
+          if (name === "month") {
+            if (switchSortingColumn.value.month < 1) switchSortingColumn.value.month++
+            else switchSortingColumn.value.month = -1
+          }
+          else if (name === "category") {
+            if (switchSortingColumn.value.category < 1) switchSortingColumn.value.category++
+            else switchSortingColumn.value.category = -1
+          }
         }
 
         const resetFilters = () => {
@@ -684,22 +797,33 @@
           const findIndex = (list, value) => {
             return list.findIndex(item => item.date + item.category + item.amount === value);
           }
+          // delete from expenses state
           const formatedDetailsToDelete = mth + "-" + day.toString().padStart(2, '0') + cat + dayAmount;
           const index = findIndex(expenses, formatedDetailsToDelete);
           if (index !== -1) expenses.splice(index, 1);
+
+          // delete from localStorage if the expense if there
           const localData = localStorage.getItem("expenses")
           if (localData) {
-            const transformedLocalData = JSON.parse(localData)
-            const index = findIndex(transformedLocalData, formatedDetailsToDelete);
-            if (index !== -1) {
-              transformedLocalData.splice(index, 1);
-              localStorage.setItem("expenses", JSON.stringify(transformedLocalData))
+            const transformedLocalData = safeJSONParse(localData, "error: when deleting amount. Couldn't parse data from localStorage")
+            if (transformedLocalData) {
+              const index = findIndex(transformedLocalData, formatedDetailsToDelete);
+              if (index !== -1) {
+                transformedLocalData.splice(index, 1);
+                const stringified = safeJSONStringify(transformedLocalData, "error: updating localStorage after deletion")
+                if (stringified) localStorage.setItem("expenses", stringified)
+              }
             }
           }
-          // if category no longer exists and is selected for filtering gets removed from selectedCategories to filter
+          // if category no longer exists and is selected for filtering so it gets removed from selectedCategories to filter
           if (!constantsList.value.categories.includes(cat)) {
             const idx = filters.value.selectedCategories.indexOf(cat)
             filters.value.selectedCategories.splice(idx, 1)
+          }
+
+          // if month no longer exists and is selected for filtering so selectedMonth gets removed from the filter
+          if (!constantsList.value.months.includes(mth)) {
+            filters.value.selectedMonth = ""
           }
         }
 
@@ -754,9 +878,24 @@
           expenses.push(newExp);
 
           // update localStorage expenses
-          const localData = JSON.parse(localStorage.getItem('expenses')) || [];
-          localData.push(newExp)
-          localStorage.setItem('expenses', JSON.stringify(localData))
+          const newUpdatedLocalExpenses = [];
+          const expensesLocalStorage = localStorage.getItem('expenses');
+          if (!expensesLocalStorage) {
+            // if there's no data in localStorage, it will be initialized
+            newUpdatedLocalExpenses.push(newExp);
+          } else {
+            const localParsed = safeJSONParse(expensesLocalStorage, "error: during adding new expense to localStorage");
+            if (localParsed) {
+              localParsed.push(newExp);
+              newUpdatedLocalExpenses.push(...localParsed);
+            }
+          }
+
+          if (newUpdatedLocalExpenses.length > 0) {
+            // updating localStorage only if there are valid expenses
+            const stringifiedAllExpenses = safeJSONStringify(newUpdatedLocalExpenses, "error: during adding regrouped expenses with the new one");
+            if (stringifiedAllExpenses) localStorage.setItem('expenses', stringifiedAllExpenses);
+          }
 
           // adapt filters if no filter chosen move it to new amount added otherwise kepp filter chosen before 
           if (newExpense.value.amount > filters.value.expenseAmountRange.max) {
@@ -772,15 +911,15 @@
 
           // notification
           insertStatus.value = "Added !"
-          setTimeout(() => { insertStatus.value = "" }, 2000)
+          setTimeout(() => { insertStatus.value = "" }, 3000)
         };
 
         // ----- HELPER FUNCTIONS -----
-        function sortSimpleExpansesBy(expensesSimpleList, key) {
-          return expensesSimpleList.sort((a, b) => a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0);
+        function sortSimpleExpansesBy(expensesSimpleList, key, direction) {
+          return expensesSimpleList.sort((a, b) => a[key] < b[key] ? -1 * direction : a[key] > b[key] ? 1 * direction : 0);
         }
 
-        function sortExpansesByCategories(expensesMapList) {
+        function sortExpansesByCategories(expensesMapList, direction) {
           // category sort for each month
           expensesMapList.forEach(month => {
             // each month contains categories that is a Map so following steps take place :
@@ -788,11 +927,29 @@
             //        2: month.categories(Map) are replaced by new sorted Map 
             const sortedCategories = new Map(
               [...month.get("categories")]
-                .sort(([categoryKeyA], [categoryKeyB]) => categoryKeyA < categoryKeyB ? -1 : categoryKeyA > categoryKeyB ? 1 : 0)
+                .sort(([categoryKeyA], [categoryKeyB]) => categoryKeyA < categoryKeyB ? -1 * direction : categoryKeyA > categoryKeyB ? 1 * direction : 0)
             )
             month.set("categories", sortedCategories);
           })
           return expensesMapList;
+        }
+
+        function safeJSONStringify(data, errorMessage) {
+          try {
+            return JSON.stringify(data);
+          } catch (error) {
+            console.error("Błąd podczas serializacji JSON:", errorMessage);
+            return null;
+          }
+        }
+
+        function safeJSONParse(data, errorMessage) {
+          try {
+            return JSON.parse(data);
+          } catch (error) {
+            console.error("Błąd podczas parsowania JSON:", errorMessage);
+            return null;
+          }
         }
 
         // ----- DERIVED/GROUPED STATE -----
@@ -810,9 +967,9 @@
           // only sort is on. Passing shallow copy not to modify original array
           let preparedExpenses;
 
-          if (switchSorting.value && switchFilters.value) preparedExpenses = sortSimpleExpansesBy([...filteredExpenses.value], "date");
-          else if (!switchSorting.value && !switchFilters.value) preparedExpenses = [...expenses];
-          else if (switchSorting.value) preparedExpenses = sortSimpleExpansesBy([...expenses], "date");
+          if (switchSortingColumn.value.month !== 0 && switchFilters.value) preparedExpenses = sortSimpleExpansesBy([...filteredExpenses.value], "date", switchSortingColumn.value.month);
+          else if (switchSortingColumn.value.month === 0 && !switchFilters.value) preparedExpenses = [...expenses];
+          else if (switchSortingColumn.value.month !== 0) preparedExpenses = sortSimpleExpansesBy([...expenses], "date", switchSortingColumn.value.month);
           else preparedExpenses = [...filteredExpenses.value];
 
           for (const { date, category, amount } of preparedExpenses) {
@@ -848,7 +1005,7 @@
           }
 
           // sorting categories of each month if switchSorting is on
-          const sortedExpanses = switchSorting.value ? sortExpansesByCategories(organisedExpenses) : organisedExpenses;
+          const sortedExpanses = switchSortingColumn.value.category !== 0 ? sortExpansesByCategories(organisedExpenses, switchSortingColumn.value.category) : organisedExpenses;
 
           return sortedExpanses
         })
@@ -860,6 +1017,7 @@
           isFormClosed,
           insertStatus,
           switchFilters,
+          switchSortingColumn,
           // ----- STATE MENAGEMENT -----
           handleNewCategoryChangeInput,
           handleExistingCategoryChangeSelect,
